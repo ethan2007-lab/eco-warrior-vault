@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🌿 Eco Media Vault</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(to right, #56ab2f, #a8e063);
+      text-align: center;
+      color: white;
+    }
+    img, video {
+      width: 200px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🌿 Eco Media Vault</h1>
+
+<input type="file" id="fileInput">
+<button onclick="uploadFile()">Upload</button>
+
+<div id="gallery"></div>
+
+<script>
+async function uploadFile() {
+  const file = document.getElementById('fileInput').files[0];
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'eco_upload');
+
+  const res = await fetch('https://api.cloudinary.com/v1_1/dtrpwaeyt/upload', {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  displayMedia(data.secure_url);
+}
+
+function displayMedia(url) {
+  const gallery = document.getElementById('gallery');
+
+  if (url.includes("video")) {
+    const vid = document.createElement("video");
+    vid.src = url;
+    vid.controls = true;
+    gallery.appendChild(vid);
+  } else {
+    const img = document.createElement("img");
+    img.src = url;
+    gallery.appendChild(img);
+  }
+}
+</script>
+
+</body>
+</html>
