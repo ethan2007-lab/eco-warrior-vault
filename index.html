@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🌿 Eco Media Vault</title>
+  <title>🌿 Eco Warriour Vault</title>
 
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(-45deg, #56ab2f, #a8e063, #00c6ff, #0072ff);
-      background-size: 400% 400%;
-      animation: gradient 10s ease infinite;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      overflow-x: hidden;
       color: white;
-      text-align: center;
-    }
-
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     h1 {
+      text-align: center;
       margin-top: 20px;
       font-size: 2.5rem;
     }
 
     .upload-box {
+      text-align: center;
       margin: 20px;
     }
 
-    input[type="file"] {
+    input {
       padding: 10px;
       border-radius: 10px;
       border: none;
@@ -38,28 +32,28 @@
     button {
       padding: 10px 20px;
       margin-left: 10px;
-      border: none;
       border-radius: 10px;
-      background: #00000080;
+      border: none;
+      background: rgba(255,255,255,0.2);
       color: white;
       cursor: pointer;
       transition: 0.3s;
     }
 
     button:hover {
-      background: black;
+      background: rgba(255,255,255,0.4);
     }
 
     #gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
       padding: 20px;
     }
 
     .card {
       background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
       border-radius: 15px;
       padding: 10px;
       transition: transform 0.3s;
@@ -73,12 +67,28 @@
       width: 100%;
       border-radius: 10px;
     }
+
+    /* Floating particles */
+    .leaf {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #a8e063;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: float 10s linear infinite;
+    }
+
+    @keyframes float {
+      from { transform: translateY(100vh) }
+      to { transform: translateY(-10vh) }
+    }
   </style>
 </head>
 
 <body>
 
-<h1>🌿 Eco Media Vault</h1>
+<h1>🌿 Eco Warriour Vault</h1>
 
 <div class="upload-box">
   <input type="file" id="fileInput">
@@ -122,6 +132,15 @@ function displayMedia(url) {
   }
 
   gallery.appendChild(card);
+}
+
+/* Create floating particles */
+for (let i = 0; i < 20; i++) {
+  let leaf = document.createElement("div");
+  leaf.className = "leaf";
+  leaf.style.left = Math.random() * 100 + "vw";
+  leaf.style.animationDuration = (5 + Math.random() * 10) + "s";
+  document.body.appendChild(leaf);
 }
 </script>
 
