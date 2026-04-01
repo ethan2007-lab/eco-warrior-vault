@@ -141,20 +141,32 @@ async function uploadFile() {
   formData.append('file', file);
   formData.append('upload_preset', 'eco_upload');
 
-  const res = await fetch('https://api.cloudinary.com/v1_1/dtrpwaeyt/upload', {
-    method: 'POST',
-    body: formData
-  });
+  try {
+    const res = await fetch('https://api.cloudinary.com/v1_1/dtrpwaeyt/upload', {
+      method: 'POST',
+      body: formData
+    });
 
-  const data = await res.json();
+    const data = await res.json();
+    console.log(data);
 
-  await db.collection("posts").add({
-    url: data.secure_url,
-    likes: 0,
-    time: Date.now()
-  });
+    if (data.error) {
+      alert("Upload error: " + data.error.message);
+      return;
+    }
 
-  loadPosts();
+    await db.collection("posts").add({
+      url: data.secure_url,
+      likes: 0,
+      time: Date.now()
+    });
+
+    loadPosts();
+
+  } catch (err) {
+    alert("Upload failed");
+    console.error(err);
+  }
 }
 
 async function loadPosts() {
