@@ -10,7 +10,7 @@
       color: white;
       background:
         linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
-        url('logo.png') no-repeat center center/cover;
+        url('./logo.png') no-repeat center center/cover;
     }
 
     .navbar {
@@ -28,7 +28,7 @@
       text-align: center;
     }
 
-    /* 🔐 LOGIN BOX */
+    /* LOGIN BOX */
     #loginPage {
       background: rgba(0,0,0,0.6);
       backdrop-filter: blur(10px);
@@ -56,7 +56,7 @@
       margin-top: 15px;
     }
 
-    /* 📤 Upload Button */
+    /* Upload Button */
     .upload-btn {
       background: linear-gradient(45deg, #56ab2f, #a8e063);
       padding: 12px 25px;
@@ -80,7 +80,6 @@
       padding: 12px;
       border-radius: 15px;
       backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
     }
 
     img, video {
@@ -96,8 +95,6 @@
     }
 
     .like { cursor: pointer; }
-    .like:active { transform: scale(1.4); }
-
     .delete { cursor: pointer; opacity: 0.6; }
 
     .comments {
@@ -111,11 +108,6 @@
       border-radius: 8px;
       border: none;
       margin-top: 5px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px);}
-      to { opacity: 1; transform: translateY(0);}
     }
 
     .hidden { display: none; }
@@ -219,7 +211,6 @@ async function loadPosts() {
     actions.className = "actions";
 
     const like = document.createElement("span");
-    like.className = "like";
     like.innerHTML = "❤️ " + post.likes;
 
     like.onclick = async () => {
@@ -230,7 +221,6 @@ async function loadPosts() {
     };
 
     const del = document.createElement("span");
-    del.className = "delete";
     del.innerHTML = "🗑";
 
     del.onclick = async () => {
@@ -244,7 +234,6 @@ async function loadPosts() {
     card.appendChild(actions);
 
     const commentsDiv = document.createElement("div");
-    commentsDiv.className = "comments";
 
     (post.comments || []).forEach(c => {
       const p = document.createElement("div");
@@ -254,7 +243,6 @@ async function loadPosts() {
 
     const input = document.createElement("input");
     input.placeholder = "Add comment...";
-    input.className = "comment-input";
 
     input.onkeypress = async (e) => {
       if (e.key === "Enter" && input.value.trim() !== "") {
