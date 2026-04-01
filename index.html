@@ -117,15 +117,15 @@ const correctUser = "ecowarrior";
 const correctPass = "student123";
 
 function login() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
+  const user = username.value;
+  const pass = password.value;
 
   if (user === correctUser && pass === correctPass) {
-    document.getElementById("loginPage").style.display = "none";
-    document.getElementById("app").classList.remove("hidden");
+    loginPage.style.display = "none";
+    app.classList.remove("hidden");
     loadPosts();
   } else {
-    document.getElementById("error").innerText = "Wrong username or password";
+    error.innerText = "Wrong username or password";
   }
 }
 
@@ -136,6 +136,14 @@ async function uploadFile() {
     alert("Select a file first");
     return;
   }
+
+  const gallery = document.getElementById('gallery');
+
+  // TEMP preview
+  const tempCard = document.createElement("div");
+  tempCard.className = "card";
+  tempCard.innerHTML = "Uploading...";
+  gallery.prepend(tempCard);
 
   const formData = new FormData();
   formData.append('file', file);
@@ -151,7 +159,7 @@ async function uploadFile() {
     console.log(data);
 
     if (data.error) {
-      alert("Upload error: " + data.error.message);
+      tempCard.innerHTML = "❌ " + data.error.message;
       return;
     }
 
@@ -164,7 +172,7 @@ async function uploadFile() {
     loadPosts();
 
   } catch (err) {
-    alert("Upload failed");
+    tempCard.innerHTML = "❌ Upload failed";
     console.error(err);
   }
 }
