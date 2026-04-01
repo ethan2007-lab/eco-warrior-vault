@@ -7,7 +7,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #0f2027;
+      background: linear-gradient(to right, #134e5e, #71b280);
       color: white;
     }
 
@@ -30,7 +30,7 @@
       padding: 10px 20px;
       border-radius: 10px;
       border: none;
-      background: #56ab2f;
+      background: #2ecc71;
       color: white;
       cursor: pointer;
     }
@@ -43,7 +43,7 @@
       text-align: center;
       padding: 15px;
       font-size: 1.5rem;
-      background: rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.2);
     }
 
     #gallery {
@@ -52,7 +52,7 @@
     }
 
     .card {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.1);
       margin: 15px;
       padding: 10px;
       border-radius: 15px;
@@ -73,16 +73,16 @@
 
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN -->
 <div id="loginPage" class="center">
-  <h2>🔐 Eco Warrior Vault Login</h2>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
+  <h2>🔐 Eco Warrior Vault</h2>
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
   <p id="error" style="color:red;"></p>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app" class="hidden">
 
   <div class="navbar">🌿 Eco Warrior Vault</div>
@@ -96,7 +96,23 @@
 
 </div>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDqhcc6RcRi5IXwLt-MyrdtKWtTKKT5aRKGA",
+  authDomain: "eco-warrior-vault-49fc3.firebaseapp.com",
+  projectId: "eco-warrior-vault-49fc3",
+  storageBucket: "eco-warrior-vault-49fc3.appspot.com",
+  messagingSenderId: "192648443627",
+  appId: "1:192648443627:web:42364414912a003cb3b0ae"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const correctUser = "ecowarrior";
 const correctPass = "student123";
 
@@ -107,19 +123,19 @@ function login() {
   if (user === correctUser && pass === correctPass) {
     document.getElementById("loginPage").style.display = "none";
     document.getElementById("app").classList.remove("hidden");
+    loadPosts();
   } else {
     document.getElementById("error").innerText = "Wrong username or password";
   }
 }
 
-let posts = JSON.parse(localStorage.getItem("posts")) || [];
-
-function savePosts() {
-  localStorage.setItem("posts", JSON.stringify(posts));
-}
-
 async function uploadFile() {
   const file = document.getElementById('fileInput').files[0];
+
+  if (!file) {
+    alert("Select a file first");
+    return;
+  }
 
   const formData = new FormData();
   formData.append('file', file);
@@ -132,16 +148,24 @@ async function uploadFile() {
 
   const data = await res.json();
 
-  posts.unshift({ url: data.secure_url, likes: 0 });
-  savePosts();
-  renderPosts();
+  await db.collection("posts").add({
+    url: data.secure_url,
+    likes: 0,
+    time: Date.now()
+  });
+
+  loadPosts();
 }
 
-function renderPosts() {
+async function loadPosts() {
   const gallery = document.getElementById('gallery');
   gallery.innerHTML = "";
 
-  posts.forEach((post, index) => {
+  const snapshot = await db.collection("posts").orderBy("time", "desc").get();
+
+  snapshot.forEach(doc => {
+    const post = doc.data();
+
     const card = document.createElement("div");
     card.className = "card";
 
@@ -162,19 +186,19 @@ function renderPosts() {
     const like = document.createElement("span");
     like.innerHTML = "❤️ " + post.likes;
 
-    like.onclick = () => {
-      post.likes++;
-      savePosts();
-      renderPosts();
+    like.onclick = async () => {
+      await db.collection("posts").doc(doc.id).update({
+        likes: post.likes + 1
+      });
+      loadPosts();
     };
 
     const del = document.createElement("span");
     del.innerHTML = "🗑";
 
-    del.onclick = () => {
-      posts.splice(index, 1);
-      savePosts();
-      renderPosts();
+    del.onclick = async () => {
+      await db.collection("posts").doc(doc.id).delete();
+      loadPosts();
     };
 
     actions.appendChild(like);
@@ -184,8 +208,6 @@ function renderPosts() {
     gallery.appendChild(card);
   });
 }
-
-renderPosts();
 </script>
 
 </body>
