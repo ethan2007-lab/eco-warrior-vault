@@ -24,6 +24,11 @@
       font-weight: bold;
     }
 
+    .center {
+      text-align: center;
+    }
+
+    /* LOGIN BOX */
     #loginPage {
       background: rgba(0,0,0,0.6);
       backdrop-filter: blur(10px);
@@ -31,7 +36,6 @@
       width: 300px;
       padding: 25px;
       border-radius: 15px;
-      text-align: center;
     }
 
     input {
@@ -52,6 +56,7 @@
       margin-top: 15px;
     }
 
+    /* Upload Button */
     .upload-btn {
       background: linear-gradient(45deg, #56ab2f, #a8e063);
       padding: 12px 25px;
@@ -92,6 +97,11 @@
     .like { cursor: pointer; }
     .delete { cursor: pointer; opacity: 0.6; }
 
+    .comments {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
     .comment-input {
       width: 95%;
       padding: 6px;
@@ -106,7 +116,8 @@
 
 <body>
 
-<div id="loginPage">
+<!-- LOGIN -->
+<div id="loginPage" class="center">
   <h2>🌿 Eco Warrior Vault</h2>
   <input id="username" placeholder="Username">
   <input id="password" type="password" placeholder="Password">
@@ -114,14 +125,15 @@
   <p id="error" style="color:red;"></p>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
 
   <div class="navbar">🌿 Eco Warrior Vault</div>
 
-  <div style="text-align:center;">
+  <div class="center">
     <label class="upload-btn">
       📤 Upload Media
-      <input type="file" id="fileInput" multiple onchange="uploadFiles()">
+      <input type="file" id="fileInput" onchange="uploadFile()">
     </label>
   </div>
 
@@ -129,6 +141,7 @@
 
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -152,41 +165,27 @@ function login() {
   }
 }
 
-// 🔥 MULTI UPLOAD FUNCTION
-async function uploadFiles() {
-  const files = fileInput.files;
+async function uploadFile() {
+  const file = fileInput.files[0];
+  if (!file) return;
 
-  if (!files.length) return alert("Select files");
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'eco_upload');
 
-  if (files.length > 30) {
-    alert("Max 30 files allowed");
-    return;
-  }
+  const res = await fetch('https://api.cloudinary.com/v1_1/dtrpwaeyt/auto/upload', {
+    method: 'POST',
+    body: formData
+  });
 
-  for (let i = 0; i < files.length; i++) {
-    const formData = new FormData();
-    formData.append('file', files[i]);
-    formData.append('upload_preset', 'eco_upload');
+  const data = await res.json();
 
-    try {
-      const res = await fetch('https://api.cloudinary.com/v1_1/dtrpwaeyt/auto/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await res.json();
-
-      await db.collection("posts").add({
-        url: data.secure_url,
-        likes: 0,
-        comments: [],
-        time: Date.now()
-      });
-
-    } catch (err) {
-      console.log("Upload failed", err);
-    }
-  }
+  await db.collection("posts").add({
+    url: data.secure_url,
+    likes: 0,
+    comments: [],
+    time: Date.now()
+  });
 
   loadPosts();
 }
@@ -234,9 +233,16 @@ async function loadPosts() {
 
     card.appendChild(actions);
 
+    const commentsDiv = document.createElement("div");
+
+    (post.comments || []).forEach(c => {
+      const p = document.createElement("div");
+      p.innerText = "💬 " + c;
+      commentsDiv.appendChild(p);
+    });
+
     const input = document.createElement("input");
     input.placeholder = "Add comment...";
-    input.className = "comment-input";
 
     input.onkeypress = async (e) => {
       if (e.key === "Enter" && input.value.trim() !== "") {
@@ -250,7 +256,9 @@ async function loadPosts() {
       }
     };
 
+    card.appendChild(commentsDiv);
     card.appendChild(input);
+
     gallery.appendChild(card);
   });
 }
