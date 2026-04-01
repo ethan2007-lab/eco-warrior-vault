@@ -1,66 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🌿 Eco Warriour Vault</title>
+  <title>🌿 Eco Warrior Vault</title>
 
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      overflow-x: hidden;
+      background: #0f2027;
       color: white;
     }
 
-    h1 {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 2.5rem;
-    }
-
-    .upload-box {
-      text-align: center;
-      margin: 20px;
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
     }
 
     input {
       padding: 10px;
+      margin: 5px;
       border-radius: 10px;
       border: none;
     }
 
     button {
       padding: 10px 20px;
-      margin-left: 10px;
       border-radius: 10px;
       border: none;
-      background: rgba(255,255,255,0.2);
+      background: #56ab2f;
       color: white;
       cursor: pointer;
-      transition: 0.3s;
     }
 
-    button:hover {
-      background: rgba(255,255,255,0.4);
+    .hidden {
+      display: none;
+    }
+
+    .navbar {
+      text-align: center;
+      padding: 15px;
+      font-size: 1.5rem;
+      background: rgba(255,255,255,0.1);
     }
 
     #gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 20px;
+      max-width: 500px;
+      margin: auto;
     }
 
     .card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(15px);
-      border-radius: 15px;
+      background: rgba(255,255,255,0.05);
+      margin: 15px;
       padding: 10px;
-      transition: transform 0.3s;
-    }
-
-    .card:hover {
-      transform: scale(1.05);
+      border-radius: 15px;
     }
 
     img, video {
@@ -68,36 +63,61 @@
       border-radius: 10px;
     }
 
-    /* Floating particles */
-    .leaf {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background: #a8e063;
-      border-radius: 50%;
-      opacity: 0.5;
-      animation: float 10s linear infinite;
-    }
-
-    @keyframes float {
-      from { transform: translateY(100vh) }
-      to { transform: translateY(-10vh) }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<h1>🌿 Eco Warriour Vault</h1>
-
-<div class="upload-box">
-  <input type="file" id="fileInput">
-  <button onclick="uploadFile()">Upload</button>
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="center">
+  <h2>🔐 Eco Warrior Vault Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p id="error" style="color:red;"></p>
 </div>
 
-<div id="gallery"></div>
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+  <div class="navbar">🌿 Eco Warrior Vault</div>
+
+  <div class="center" style="height:auto;">
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">Upload</button>
+  </div>
+
+  <div id="gallery"></div>
+
+</div>
 
 <script>
+const correctUser = "ecowarrior";
+const correctPass = "student123";
+
+function login() {
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+
+  if (user === correctUser && pass === correctPass) {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("app").classList.remove("hidden");
+  } else {
+    document.getElementById("error").innerText = "Wrong username or password";
+  }
+}
+
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+function savePosts() {
+  localStorage.setItem("posts", JSON.stringify(posts));
+}
+
 async function uploadFile() {
   const file = document.getElementById('fileInput').files[0];
 
@@ -111,37 +131,61 @@ async function uploadFile() {
   });
 
   const data = await res.json();
-  displayMedia(data.secure_url);
+
+  posts.unshift({ url: data.secure_url, likes: 0 });
+  savePosts();
+  renderPosts();
 }
 
-function displayMedia(url) {
+function renderPosts() {
   const gallery = document.getElementById('gallery');
+  gallery.innerHTML = "";
 
-  const card = document.createElement("div");
-  card.className = "card";
+  posts.forEach((post, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
 
-  if (url.includes("video")) {
-    const vid = document.createElement("video");
-    vid.src = url;
-    vid.controls = true;
-    card.appendChild(vid);
-  } else {
-    const img = document.createElement("img");
-    img.src = url;
-    card.appendChild(img);
-  }
+    let media;
+    if (post.url.includes("video")) {
+      media = document.createElement("video");
+      media.controls = true;
+    } else {
+      media = document.createElement("img");
+    }
 
-  gallery.appendChild(card);
+    media.src = post.url;
+    card.appendChild(media);
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const like = document.createElement("span");
+    like.innerHTML = "❤️ " + post.likes;
+
+    like.onclick = () => {
+      post.likes++;
+      savePosts();
+      renderPosts();
+    };
+
+    const del = document.createElement("span");
+    del.innerHTML = "🗑";
+
+    del.onclick = () => {
+      posts.splice(index, 1);
+      savePosts();
+      renderPosts();
+    };
+
+    actions.appendChild(like);
+    actions.appendChild(del);
+
+    card.appendChild(actions);
+    gallery.appendChild(card);
+  });
 }
 
-/* Create floating particles */
-for (let i = 0; i < 20; i++) {
-  let leaf = document.createElement("div");
-  leaf.className = "leaf";
-  leaf.style.left = Math.random() * 100 + "vw";
-  leaf.style.animationDuration = (5 + Math.random() * 10) + "s";
-  document.body.appendChild(leaf);
-}
+renderPosts();
 </script>
 
 </body>
